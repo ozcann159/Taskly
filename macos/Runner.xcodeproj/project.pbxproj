@@ -217,7 +217,11 @@
 			);
 			name = Runner;
 			productName = Runner;
+<<<<<<< HEAD
 			productReference = 33CC10ED2044A3C60003C045 /* new_todo_app.app */;
+=======
+			productReference = 33CC10ED2044A3C60003C045 /* todo_task_app.app */;
+>>>>>>> 83ae3cbedbc8701a6a67ea245d4a144fcc4165a9
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
