@@ -40,10 +40,7 @@ dependencies:
   cloud_firestore: ^5.1.0
   json_annotation: ^4.9.0
   intl: ^0.19.0
-<<<<<<< HEAD
   google_fonts: ^6.2.1
-=======
->>>>>>> 83ae3cbedbc8701a6a67ea245d4a144fcc4165a9
 
 dev_dependencies:
   flutter_test:
