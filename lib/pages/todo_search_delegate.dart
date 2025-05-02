@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:new_todo_app/controllers/todo_controller.dart';
 import 'package:new_todo_app/widgets/todo_card.dart';
+import 'package:intl/intl.dart';
 
 class TodoSearchDelegate extends SearchDelegate<String> {
   final TodoController todoController;
@@ -48,6 +49,10 @@ class TodoSearchDelegate extends SearchDelegate<String> {
     }
 
     final isDarkMode = Get.isDarkMode;
+    final backgroundColor = isDarkMode ? Color(0xFF121212) : Color(0xFFF5F5F5);
+    final cardColor = isDarkMode ? Color(0xFF1E1E1E) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
 
     return StreamBuilder<QuerySnapshot>(
       stream:
@@ -60,28 +65,65 @@ class TodoSearchDelegate extends SearchDelegate<String> {
               .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
+            ),
+          );
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                const SizedBox(height: 16),
+                Text(
+                  'Bir hata oluştu: ${snapshot.error}',
+                  style: TextStyle(color: secondaryTextColor),
+                ),
+              ],
+            ),
+          );
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('Görev bulunamadı'));
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Aramanızla eşleşen görev bulunamadı',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
-        // Arama sonuçlarını filtrele
+        // Arama filtrelemesi
         final filteredDocs =
             snapshot.data!.docs.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              final title = (data['title'] ?? '').toString().toLowerCase();
-              final description =
-                  (data['description'] ?? '').toString().toLowerCase();
-              final searchQuery = query.toLowerCase();
+              final title = data['title'] ?? '';
+              final description = data['description'] ?? '';
 
-              return title.contains(searchQuery) ||
-                  description.contains(searchQuery);
+              return title.toString().toLowerCase().contains(
+                    query.toLowerCase(),
+                  ) ||
+                  description.toString().toLowerCase().contains(
+                    query.toLowerCase(),
+                  );
             }).toList();
 
         if (filteredDocs.isEmpty) {
@@ -121,54 +163,182 @@ class TodoSearchDelegate extends SearchDelegate<String> {
             final priority = data['priority'] ?? 1;
             final category = data['category'] ?? 'diğer';
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: TodoCard(
-                id: id,
-                title: title,
-                description: description,
-                dueDate: dueDate,
-                isCompleted: isCompleted,
-                priority: priority,
-                category: category,
-                onDelete: () {
-                  FirebaseFirestore.instance
-                      .collection('todos')
-                      .doc(id)
-                      .delete();
-                  close(context, '');
-                },
-                onEdit: () {
-                  close(context, '');
-                  Get.toNamed(
-                    '/todo-form',
-                    arguments: {'todoId': id, 'isUpdate': true},
-                  );
-                },
-                onToggleComplete: (value) {
-                  if (value != null) {
-                    FirebaseFirestore.instance
-                        .collection('todos')
-                        .doc(id)
-                        .update({'isCompleted': value});
-                  }
-                },
-                todo: data,
+            // Öncelik etiketi
+            String priorityLabel = '';
+            Color priorityColor = Colors.green;
+
+            if (priority == 1) {
+              priorityLabel = 'Düşük';
+              priorityColor = Colors.green;
+            } else if (priority == 2) {
+              priorityLabel = 'Orta';
+              priorityColor = Colors.orange;
+            } else {
+              priorityLabel = 'Yüksek';
+              priorityColor = Colors.red;
+            }
+
+            // Kategori rengini belirle
+            Color categoryColor;
+            IconData categoryIcon;
+
+            switch (category) {
+              case 'iş':
+                categoryColor = Colors.blue;
+                categoryIcon = Icons.work;
+                break;
+              case 'kişisel':
+                categoryColor = Colors.purple;
+                categoryIcon = Icons.person;
+                break;
+              case 'alışveriş':
+                categoryColor = Colors.amber;
+                categoryIcon = Icons.shopping_cart;
+                break;
+              case 'sağlık':
+                categoryColor = Colors.red;
+                categoryIcon = Icons.favorite;
+                break;
+              case 'eğitim':
+                categoryColor = Colors.teal;
+                categoryIcon = Icons.school;
+                break;
+              default:
+                categoryColor = Colors.grey;
+                categoryIcon = Icons.category;
+            }
+
+            final formattedDate = DateFormat('dd MMM yyyy').format(dueDate);
+
+            return Card(
+              elevation: 2,
+              margin: const EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: cardColor,
+              child: InkWell(
                 onTap: () {
-                  close(context, '');
                   Get.toNamed(
                     '/todo-form',
                     arguments: {'todoId': id, 'isUpdate': true},
                   );
                 },
-                onStatusChanged: (value) {
-                  if (value != null) {
-                    FirebaseFirestore.instance
-                        .collection('todos')
-                        .doc(id)
-                        .update({'isCompleted': value});
-                  }
-                },
+                borderRadius: BorderRadius.circular(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Başlık ve öncelik
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: priorityColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.flag,
+                                  size: 16,
+                                  color: priorityColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  priorityLabel,
+                                  style: TextStyle(
+                                    color: priorityColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Açıklama
+                    if (description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          description,
+                          style: TextStyle(color: secondaryTextColor),
+                        ),
+                      ),
+
+                    // Alt bilgiler
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Kategori
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: categoryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  categoryIcon,
+                                  size: 16,
+                                  color: categoryColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  category,
+                                  style: TextStyle(
+                                    color: categoryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          // Tarih
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: secondaryTextColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formattedDate,
+                            style: TextStyle(
+                              color: secondaryTextColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

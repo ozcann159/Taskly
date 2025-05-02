@@ -32,6 +32,10 @@ class TodoController extends GetxController {
     });
   }
 
+  void refreshTodos() {
+    update();
+  }
+
   void fetchTodos(String userId) {
     isLoading.value = true;
     if (userId.isNotEmpty) {

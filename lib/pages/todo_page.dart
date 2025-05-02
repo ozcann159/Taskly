@@ -326,8 +326,15 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
     }
   }
 
-  void _editTodo(String id) {
-    Get.toNamed('/todo-form', arguments: id);
+  void _editTodo(String id) async {
+    final result = await Get.toNamed('/todo-form', arguments: id);
+
+    // Eğer sonuç true ise (başarılı kaydetme), görev listesini yenile
+    if (result == true) {
+      setState(() {
+        // Sayfayı yenile
+      });
+    }
   }
 
   @override

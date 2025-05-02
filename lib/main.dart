@@ -46,10 +46,11 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
       ),
       themeMode: ThemeMode.system,
-      initialRoute: isLoggedIn ? '/todo-page' : '/login',
+      initialRoute: isLoggedIn ? '/todo' : '/login',
       getPages: [
         GetPage(name: '/login', page: () => const LoginPage()),
         GetPage(name: '/register', page: () => const RegisterPage()),
+        GetPage(name: '/todo', page: () => const TodoPage()),
         GetPage(name: '/todo-page', page: () => const TodoPage()),
         GetPage(name: '/statistics', page: () => const StatisticsPage()),
         GetPage(name: '/profile', page: () => const ProfilePage()),
