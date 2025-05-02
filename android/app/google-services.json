@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040199626863",
+    "project_id": "todoapp-4f994",
+    "storage_bucket": "todoapp-4f994.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040199626863:android:a59b0c20ca83e9f0d05d9a",
+        "android_client_info": {
+          "package_name": "com.elifozcan.todoapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmkI-dt96uxiMJTkudCxO3avNtxVcyM4M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
