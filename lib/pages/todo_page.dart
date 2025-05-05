@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -89,179 +90,337 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
     final id = doc.id;
     final title = data['title'] ?? '';
     final description = data['description'] ?? '';
-    final dueDate = (data['dueDate'] as Timestamp).toDate();
+    DateTime dueDate;
+    if (data['dueDate'] != null) {
+      dueDate = (data['dueDate'] as Timestamp).toDate();
+    } else {
+      dueDate = DateTime.now(); // Varsayılan değer
+    }
+    //final dueDate = (data['dueDate'] as Timestamp).toDate();
+
     final isCompleted = data['isCompleted'] ?? false;
     final priority = data['priority'] ?? 1;
     final category = data['category'] ?? 'diğer';
+
+    // Dark mod kontrolü
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final completedTextColor = Colors.grey;
+
+    // Kategori bilgilerini al
+    final categoryInfo = _categories.firstWhere(
+      (cat) => cat['id'] == category,
+      orElse: () => _categories.first,
+    );
 
     // Öncelik etiketi
     String priorityLabel = '';
     Color priorityColor = Colors.green;
 
     if (priority == 1) {
-      priorityLabel = 'low';
+      priorityLabel = 'Düşük';
       priorityColor = Colors.green;
     } else if (priority == 2) {
-      priorityLabel = 'medium';
+      priorityLabel = 'Orta';
       priorityColor = Colors.orange;
     } else if (priority == 3) {
-      priorityLabel = 'high';
+      priorityLabel = 'Yüksek';
       priorityColor = Colors.red;
     }
 
     // Tarih formatı
     String dateText =
-        'Son Tarih: ${dueDate.day} ${_getMonthName(dueDate.month)} ${dueDate.year}';
-    if (isCompleted) {
-      dateText =
-          'Tamamlandı: ${dueDate.day} ${_getMonthName(dueDate.month)} ${dueDate.year}';
-    }
+        isCompleted
+            ? 'Tamamlandı: ${dueDate.day} ${_getMonthName(dueDate.month)} ${dueDate.year}'
+            : 'Son Tarih: ${dueDate.day} ${_getMonthName(dueDate.month)} ${dueDate.year}';
 
-    return Card(
-      margin: EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Başlık ve öncelik
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color:
-                  isCompleted
-                      ? Colors.grey.withOpacity(0.1)
-                      : Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+    return Dismissible(
+      key: Key(id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.delete, color: Colors.white, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              'Sil',
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    decoration: isCompleted ? TextDecoration.lineThrough : null,
+          ],
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        if (Theme.of(context).platform == TargetPlatform.iOS) {
+          // iOS için Cupertino diyalog
+          return await showCupertinoDialog<bool>(
+            context: context,
+            builder:
+                (context) => CupertinoAlertDialog(
+                  title: Text('Görevi Sil'),
+                  content: Text(
+                    'Bu görevi silmek istediğinizden emin misiniz?',
                   ),
-                ),
-                if (!isCompleted && priority > 0)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: priorityColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                  actions: [
+                    CupertinoDialogAction(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text('İptal'),
+                      isDefaultAction: true,
                     ),
-                    child: Text(
-                      priorityLabel,
-                      style: TextStyle(
-                        color: priorityColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                    CupertinoDialogAction(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text('Sil'),
+                      isDestructiveAction: true,
+                    ),
+                  ],
+                ),
+          );
+        } else {
+          // Android için Material diyalog
+          return await showDialog<bool>(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text('Görevi Sil'),
+                  content: Text(
+                    'Bu görevi silmek istediğinizden emin misiniz?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text('İptal'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text('Sil'),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    ),
+                  ],
+                ),
+          );
+        }
+      },
+      onDismissed: (direction) {
+        // Silme işlemini gerçekleştir
+        FirebaseFirestore.instance.collection('todos').doc(id).delete().then((
+          _,
+        ) {
+          // Başarı bildirimi
+          showCupertinoModalPopup(
+            context: context,
+            builder:
+                (context) => CupertinoActionSheet(
+                  title: Text('Başarılı'),
+                  message: Text('Görev başarıyla silindi'),
+                  actions: [
+                    CupertinoActionSheetAction(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('Tamam'),
+                    ),
+                  ],
+                ),
+          );
+        });
+      },
+      child: Card(
+        margin: EdgeInsets.only(bottom: 8),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.withOpacity(0.2), width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Sol taraf - Tamamlama checkbox
+              Container(
+                margin: EdgeInsets.only(right: 12, top: 2),
+                child: InkWell(
+                  onTap: () => _toggleTodoComplete(id, !isCompleted),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          isCompleted ? Color(0xFF6200EE) : Colors.transparent,
+                      border: Border.all(
+                        color: isCompleted ? Color(0xFF6200EE) : Colors.grey,
+                        width: 1.5,
                       ),
                     ),
+                    padding: EdgeInsets.all(2),
+                    child:
+                        isCompleted
+                            ? Icon(Icons.check, size: 16, color: Colors.white)
+                            : SizedBox(width: 16, height: 16),
                   ),
-              ],
-            ),
-          ),
-
-          // Açıklama
-          if (description.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                  decoration: isCompleted ? TextDecoration.lineThrough : null,
                 ),
               ),
-            ),
 
-          // Alt bilgiler
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Kategori
-                Row(
+              // Orta kısım - İçerik
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.category_outlined, size: 16, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(
-                      category,
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    // Başlık ve öncelik
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              decoration:
+                                  isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                              color:
+                                  isCompleted ? completedTextColor : textColor,
+                            ),
+                          ),
+                        ),
+                        if (!isCompleted && priority > 0)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: priorityColor.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              priorityLabel,
+                              style: TextStyle(
+                                color: priorityColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    // Açıklama (varsa)
+                    if (description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color:
+                                isCompleted
+                                    ? completedTextColor
+                                    : secondaryTextColor,
+                            decoration:
+                                isCompleted ? TextDecoration.lineThrough : null,
+                          ),
+                        ),
+                      ),
+
+                    // Alt bilgiler
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          // Kategori
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: (categoryInfo['color'] as Color)
+                                  .withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  categoryInfo['icon'] as IconData,
+                                  size: 12,
+                                  color: categoryInfo['color'] as Color,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  categoryInfo['name'] as String,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: categoryInfo['color'] as Color,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(width: 8),
+
+                          // Tarih
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 12,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  dateText,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
+              ),
 
-                // Tarih
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      dateText,
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // Butonlar
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Tamamla butonu (sadece tamamlanmamış görevlerde)
-                if (!isCompleted)
-                  IconButton(
-                    icon: Icon(Icons.check_circle_outline, color: Colors.green),
-                    onPressed: () => _toggleTodoComplete(id, true),
-                    splashRadius: 20,
-                  ),
-
-                // Geri al butonu (sadece tamamlanmış görevlerde)
-                if (isCompleted)
-                  IconButton(
-                    icon: Icon(Icons.refresh, color: Colors.blue),
-                    onPressed: () => _toggleTodoComplete(id, false),
-                    splashRadius: 20,
-                  ),
-
-                // Düzenle butonu
-                if (!isCompleted)
-                  IconButton(
-                    icon: Icon(Icons.edit, color: Colors.blue),
-                    onPressed: () => _editTodo(id),
-                    splashRadius: 20,
-                  ),
-
-                // Sil butonu
+              // Sağ taraf - Düzenleme butonu
+              if (!isCompleted)
                 IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _deleteTodo(id),
+                  icon: Icon(Icons.edit_outlined, size: 20, color: Colors.blue),
+                  onPressed: () => _editTodo(id),
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
                   splashRadius: 20,
                 ),
-              ],
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -269,18 +428,18 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
   // Ay adını döndüren yardımcı fonksiyon
   String _getMonthName(int month) {
     const months = [
-      'Jan',
-      'Feb',
+      'Oca',
+      'Şub',
       'Mar',
-      'Apr',
+      'Nis',
       'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Haz',
+      'Tem',
+      'Ağu',
+      'Eyl',
+      'Eki',
+      'Kas',
+      'Ara',
     ];
     return months[month - 1];
   }
@@ -295,33 +454,45 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
   }
 
   void _deleteTodo(String id) async {
-    // Kullanıcıya silme işlemini onaylatma
-    bool confirm = await Get.dialog(
-      AlertDialog(
-        title: Text('Görevi Sil'),
-        content: Text('Bu görevi silmek istediğinizden emin misiniz?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('İptal'),
+    // Kullanıcıya silme işlemini onaylatma (Cupertino tarzında)
+    bool? confirm = await showCupertinoDialog<bool>(
+      context: context,
+      builder:
+          (context) => CupertinoAlertDialog(
+            title: Text('Görevi Sil'),
+            content: Text('Bu görevi silmek istediğinizden emin misiniz?'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('İptal'),
+                isDefaultAction: true,
+              ),
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('Sil'),
+                isDestructiveAction: true,
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text('Sil'),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-          ),
-        ],
-      ),
     );
 
-    if (confirm) {
+    if (confirm == true) {
       await FirebaseFirestore.instance.collection('todos').doc(id).delete();
-      Get.snackbar(
-        'Başarılı',
-        'Görev başarıyla silindi',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+
+      // Cupertino tarzında başarı bildirimi
+      showCupertinoModalPopup(
+        context: context,
+        builder:
+            (context) => CupertinoActionSheet(
+              title: Text('Başarılı'),
+              message: Text('Görev başarıyla silindi'),
+              actions: [
+                CupertinoActionSheetAction(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Tamam'),
+                ),
+              ],
+            ),
       );
     }
   }
@@ -597,107 +768,54 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
                         const SizedBox(height: 16),
                         Text(
                           'Bir hata oluştu: ${snapshot.error}',
-                          style: TextStyle(color: secondaryTextColor),
+                          style: TextStyle(color: Colors.red[300]),
                         ),
                       ],
                     ),
                   );
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[800]!.withOpacity(0.3)
-                                    : Colors.grey[100]!,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.task_alt,
-                            size: 64,
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[500]
-                                    : Colors.grey[400],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Henüz bekleyen görev bulunmuyor',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.white70 : Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: () => Get.toNamed('/todo-form'),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Yeni Görev Ekle'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                final docs = snapshot.data?.docs ?? [];
 
                 // Kategori filtreleme
-                var filteredDocs = snapshot.data!.docs;
-                if (_selectedCategory != 'tümü') {
-                  filteredDocs =
-                      filteredDocs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        return data['category'] == _selectedCategory;
-                      }).toList();
-                }
+                final filteredDocs =
+                    _selectedCategory == 'tümü'
+                        ? docs
+                        : docs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          return data['category'] == _selectedCategory;
+                        }).toList();
 
                 if (filteredDocs.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[800]!.withOpacity(0.3)
-                                    : Colors.grey[100]!,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.filter_list,
-                            size: 64,
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[500]
-                                    : Colors.grey[400],
+                        Icon(Icons.task_alt, size: 64, color: Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Bekleyen görev bulunamadı',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Bu kategoride bekleyen görev bulunmuyor',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.white70 : Colors.black87,
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: () => Get.toNamed('/todo-form'),
+                          icon: Icon(Icons.add),
+                          label: Text('Yeni Görev Ekle'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -708,14 +826,13 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(16),
                   itemCount: filteredDocs.length,
                   itemBuilder: (context, index) {
-                    final doc = filteredDocs[index];
-                    return _buildTodoCard(doc);
+                    return _buildTodoCard(filteredDocs[index]);
                   },
                 );
               },
             ),
 
-            // Tamamlanan görevler
+            // Tamamlanan görevler - Aynı UI yapısı
             StreamBuilder<QuerySnapshot>(
               stream:
                   FirebaseFirestore.instance
@@ -725,7 +842,7 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
                         isEqualTo: FirebaseAuth.instance.currentUser?.uid,
                       )
                       .where('isCompleted', isEqualTo: true)
-                      .orderBy('updatedAt', descending: true)
+                      .orderBy('dueDate') // Sadece tek bir alana göre sıralama
                       .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -747,93 +864,41 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
                         const SizedBox(height: 16),
                         Text(
                           'Bir hata oluştu: ${snapshot.error}',
-                          style: TextStyle(color: secondaryTextColor),
+                          style: TextStyle(color: Colors.red[300]),
                         ),
                       ],
                     ),
                   );
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[800]!.withOpacity(0.3)
-                                    : Colors.grey[100]!,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.check_circle_outline,
-                            size: 64,
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[500]
-                                    : Colors.grey[400],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Henüz tamamlanan görev bulunmuyor',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.white70 : Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                final docs = snapshot.data?.docs ?? [];
 
                 // Kategori filtreleme
-                var filteredDocs = snapshot.data!.docs;
-                if (_selectedCategory != 'tümü') {
-                  filteredDocs =
-                      filteredDocs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        return data['category'] == _selectedCategory;
-                      }).toList();
-                }
+                final filteredDocs =
+                    _selectedCategory == 'tümü'
+                        ? docs
+                        : docs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          return data['category'] == _selectedCategory;
+                        }).toList();
 
                 if (filteredDocs.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[800]!.withOpacity(0.3)
-                                    : Colors.grey[100]!,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.filter_list,
-                            size: 64,
-                            color:
-                                isDarkMode
-                                    ? Colors.grey[500]
-                                    : Colors.grey[400],
-                          ),
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 64,
+                          color: Colors.grey[400],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         Text(
-                          'Bu kategoride tamamlanan görev bulunmuyor',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.white70 : Colors.black87,
+                          'Tamamlanan görev bulunamadı',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.grey[600],
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -844,8 +909,7 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(16),
                   itemCount: filteredDocs.length,
                   itemBuilder: (context, index) {
-                    final doc = filteredDocs[index];
-                    return _buildTodoCard(doc);
+                    return _buildTodoCard(filteredDocs[index]);
                   },
                 );
               },
@@ -853,20 +917,19 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      floatingActionButton: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: FloatingActionButton.extended(
-          onPressed: () => Get.toNamed('/todo-form'),
-          icon: const Icon(Icons.add),
-          label: Text(
-            'Yeni Görev',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.toNamed('/todo-form'),
+        backgroundColor: primaryColor,
+        icon: Icon(Icons.add, color: Colors.white),
+        label: Text(
+          'Yeni Görev',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
           ),
-          elevation: 4,
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
         ),
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
     );
   }

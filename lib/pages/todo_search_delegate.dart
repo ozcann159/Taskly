@@ -1,10 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:new_todo_app/controllers/todo_controller.dart';
-import 'package:new_todo_app/widgets/todo_card.dart';
-import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TodoSearchDelegate extends SearchDelegate<String> {
   final TodoController todoController;
@@ -15,7 +14,7 @@ class TodoSearchDelegate extends SearchDelegate<String> {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: const Icon(Icons.clear),
+        icon: Icon(Icons.clear),
         onPressed: () {
           query = '';
         },
@@ -26,7 +25,7 @@ class TodoSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.arrow_back),
+      icon: Icon(Icons.arrow_back),
       onPressed: () {
         close(context, '');
       },
@@ -35,315 +34,261 @@ class TodoSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return _buildSearchResults();
+    return _buildSearchResults(context);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return _buildSearchResults();
+    return _buildSearchResults(context);
   }
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(BuildContext context) {
     if (query.isEmpty) {
-      return const Center(child: Text('Arama yapmak için bir şeyler yazın'));
+      return Center(
+        child: Text(
+          'Görev aramak için bir şeyler yazın',
+          style: GoogleFonts.poppins(color: Colors.grey, fontSize: 16),
+        ),
+      );
     }
 
-    final isDarkMode = Get.isDarkMode;
-    final backgroundColor = isDarkMode ? Color(0xFF121212) : Color(0xFFF5F5F5);
-    final cardColor = isDarkMode ? Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? Color(0xFF121212) : Color(0xFFF5F5F7);
 
-    return StreamBuilder<QuerySnapshot>(
-      stream:
-          FirebaseFirestore.instance
-              .collection('todos')
-              .where(
-                'userId',
-                isEqualTo: FirebaseAuth.instance.currentUser?.uid,
-              )
-              .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(
-              color: Theme.of(context).primaryColor,
-            ),
-          );
-        }
+    return Container(
+      color: backgroundColor,
+      child: StreamBuilder<QuerySnapshot>(
+        stream:
+            FirebaseFirestore.instance
+                .collection('todos')
+                .where('title', isGreaterThanOrEqualTo: query)
+                .where('title', isLessThanOrEqualTo: query + '\uf8ff')
+                .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
-                const SizedBox(height: 16),
-                Text(
-                  'Bir hata oluştu: ${snapshot.error}',
-                  style: TextStyle(color: secondaryTextColor),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.search_off,
-                  size: 64,
-                  color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Aramanızla eşleşen görev bulunamadı',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: isDarkMode ? Colors.white70 : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        // Arama filtrelemesi
-        final filteredDocs =
-            snapshot.data!.docs.where((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              final title = data['title'] ?? '';
-              final description = data['description'] ?? '';
-
-              return title.toString().toLowerCase().contains(
-                    query.toLowerCase(),
-                  ) ||
-                  description.toString().toLowerCase().contains(
-                    query.toLowerCase(),
-                  );
-            }).toList();
-
-        if (filteredDocs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.search_off,
-                  size: 64,
-                  color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Aramanızla eşleşen görev bulunamadı',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: isDarkMode ? Colors.white70 : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: filteredDocs.length,
-          itemBuilder: (context, index) {
-            final doc = filteredDocs[index];
-            final data = doc.data() as Map<String, dynamic>;
-            final id = doc.id;
-            final title = data['title'] ?? '';
-            final description = data['description'] ?? '';
-            final dueDate = (data['dueDate'] as Timestamp).toDate();
-            final isCompleted = data['isCompleted'] ?? false;
-            final priority = data['priority'] ?? 1;
-            final category = data['category'] ?? 'diğer';
-
-            // Öncelik etiketi
-            String priorityLabel = '';
-            Color priorityColor = Colors.green;
-
-            if (priority == 1) {
-              priorityLabel = 'Düşük';
-              priorityColor = Colors.green;
-            } else if (priority == 2) {
-              priorityLabel = 'Orta';
-              priorityColor = Colors.orange;
-            } else {
-              priorityLabel = 'Yüksek';
-              priorityColor = Colors.red;
-            }
-
-            // Kategori rengini belirle
-            Color categoryColor;
-            IconData categoryIcon;
-
-            switch (category) {
-              case 'iş':
-                categoryColor = Colors.blue;
-                categoryIcon = Icons.work;
-                break;
-              case 'kişisel':
-                categoryColor = Colors.purple;
-                categoryIcon = Icons.person;
-                break;
-              case 'alışveriş':
-                categoryColor = Colors.amber;
-                categoryIcon = Icons.shopping_cart;
-                break;
-              case 'sağlık':
-                categoryColor = Colors.red;
-                categoryIcon = Icons.favorite;
-                break;
-              case 'eğitim':
-                categoryColor = Colors.teal;
-                categoryIcon = Icons.school;
-                break;
-              default:
-                categoryColor = Colors.grey;
-                categoryIcon = Icons.category;
-            }
-
-            final formattedDate = DateFormat('dd MMM yyyy').format(dueDate);
-
-            return Card(
-              elevation: 2,
-              margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              color: cardColor,
-              child: InkWell(
-                onTap: () {
-                  Get.toNamed(
-                    '/todo-form',
-                    arguments: {'todoId': id, 'isUpdate': true},
-                  );
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Başlık ve öncelik
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: priorityColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.flag,
-                                  size: 16,
-                                  color: priorityColor,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  priorityLabel,
-                                  style: TextStyle(
-                                    color: priorityColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Açıklama
-                    if (description.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          description,
-                          style: TextStyle(color: secondaryTextColor),
-                        ),
-                      ),
-
-                    // Alt bilgiler
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          // Kategori
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: categoryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  categoryIcon,
-                                  size: 16,
-                                  color: categoryColor,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  category,
-                                  style: TextStyle(
-                                    color: categoryColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Spacer(),
-                          // Tarih
-                          Icon(
-                            Icons.calendar_today,
-                            size: 16,
-                            color: secondaryTextColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            formattedDate,
-                            style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Bir hata oluştu: ${snapshot.error}',
+                style: GoogleFonts.poppins(color: Colors.red),
               ),
             );
-          },
-        );
-      },
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search_off, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'Sonuç bulunamadı',
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Farklı bir arama terimi deneyin',
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: EdgeInsets.all(16),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final doc = docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              final id = doc.id;
+              final title = data['title'] ?? '';
+              final description = data['description'] ?? '';
+              final isCompleted = data['isCompleted'] ?? false;
+
+              // Kategori bilgisi
+              String categoryId;
+              if (data['category'] is Map<String, dynamic>) {
+                categoryId =
+                    (data['category'] as Map<String, dynamic>)['id']
+                        as String? ??
+                    'diğer';
+              } else if (data['category'] is String) {
+                categoryId = data['category'] as String;
+              } else {
+                categoryId = 'diğer';
+              }
+
+              return Card(
+                margin: EdgeInsets.only(bottom: 8),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: Colors.grey.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          isCompleted ? Color(0xFF6200EE) : Colors.transparent,
+                      border: Border.all(
+                        color: isCompleted ? Color(0xFF6200EE) : Colors.grey,
+                        width: 1.5,
+                      ),
+                    ),
+                    padding: EdgeInsets.all(2),
+                    child:
+                        isCompleted
+                            ? Icon(Icons.check, size: 16, color: Colors.white)
+                            : SizedBox(width: 16, height: 16),
+                  ),
+                  title: Text(
+                    title,
+                    style: TextStyle(
+                      decoration:
+                          isCompleted ? TextDecoration.lineThrough : null,
+                      color: isCompleted ? Colors.grey : null,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle:
+                      description.isNotEmpty
+                          ? Text(
+                            description,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              decoration:
+                                  isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                              color:
+                                  isCompleted
+                                      ? Colors.grey
+                                      : Colors.grey.shade600,
+                            ),
+                          )
+                          : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!isCompleted)
+                        IconButton(
+                          icon: Icon(
+                            Icons.edit_outlined,
+                            size: 20,
+                            color: Colors.blue,
+                          ),
+                          onPressed: () {
+                            close(context, '');
+                            Get.toNamed('/todo-form', arguments: id);
+                          },
+                        ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                        onPressed: () {
+                          _deleteTodo(context, id);
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    if (id != null && id.isNotEmpty) {
+                      close(context, '');
+                      Get.toNamed('/todo-detail', arguments: id);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Görev ID bulunamadı'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
+  }
+
+  void _deleteTodo(BuildContext context, String id) async {
+    // mounted kontrolünü kaldırın
+    // if (!mounted) return;  // Bu satırı kaldırın
+
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Görevi Sil'),
+            content: Text('Bu görevi silmek istediğinizden emin misiniz?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('İptal'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('Sil'),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm == true) {
+      try {
+        await FirebaseFirestore.instance.collection('todos').doc(id).delete();
+
+        // Bu kontrolü de kaldırın
+        // if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Görev başarıyla silindi'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        // }
+      } catch (e) {
+        // Bu kontrolü de kaldırın
+        // if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Görev silinirken hata oluştu: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        // }
+      }
+    }
   }
 }

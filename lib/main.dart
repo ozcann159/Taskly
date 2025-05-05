@@ -6,6 +6,7 @@ import 'package:new_todo_app/pages/login_page.dart';
 import 'package:new_todo_app/pages/profile_page.dart';
 import 'package:new_todo_app/pages/register_page.dart';
 import 'package:new_todo_app/pages/statistics_page.dart';
+import 'package:new_todo_app/pages/todo_detail_page.dart';
 import 'package:new_todo_app/pages/todo_form_page.dart';
 import 'package:new_todo_app/pages/todo_page.dart';
 
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/todo', page: () => const TodoPage()),
         GetPage(name: '/todo-page', page: () => const TodoPage()),
         GetPage(name: '/statistics', page: () => const StatisticsPage()),
+        GetPage(name: '/todo-detail', page: () => TodoDetailPage()),
         GetPage(name: '/profile', page: () => const ProfilePage()),
         GetPage(
           name: '/todo-form',

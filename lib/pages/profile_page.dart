@@ -9,11 +9,12 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final isDarkMode = Get.isDarkMode;
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    final backgroundColor =
-        isDarkMode ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
-    final cardColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Ana tema renkleri - diğer sayfalarda kullanılan aynı renk şeması
+    final primaryColor = Color(0xFF6200EE);
+    final backgroundColor = isDarkMode ? Color(0xFF121212) : Color(0xFFF5F5F7);
+    final cardColor = isDarkMode ? Color(0xFF1E1E1E) : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
 
