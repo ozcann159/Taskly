@@ -2,8 +2,8 @@
     package="com.elifozcan.todoapp">
 
     <application
-        android:label="new_todo_app"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Taskly"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name="com.elifozcan.todoapp.MainActivity"
             android:exported="true"

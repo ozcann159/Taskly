@@ -2,13 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:new_todo_app/pages/login_page.dart';
-import 'package:new_todo_app/pages/profile_page.dart';
-import 'package:new_todo_app/pages/register_page.dart';
-import 'package:new_todo_app/pages/statistics_page.dart';
-import 'package:new_todo_app/pages/todo_detail_page.dart';
-import 'package:new_todo_app/pages/todo_form_page.dart';
-import 'package:new_todo_app/pages/todo_page.dart';
+import 'package:new_todo_app/presentation/pages/auth/forgot_password_page.dart';
+import 'package:new_todo_app/presentation/pages/auth/login_page.dart';
+import 'package:new_todo_app/presentation/pages/auth/register_page.dart';
+import 'package:new_todo_app/presentation/pages/profile/profile_page.dart';
+import 'package:new_todo_app/presentation/pages/statistics/statistics_page.dart';
+import 'package:new_todo_app/presentation/pages/todo/todo_detail_page.dart';
+import 'package:new_todo_app/presentation/pages/todo/todo_form_page.dart';
+import 'package:new_todo_app/presentation/pages/todo/todo_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,8 +50,9 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       initialRoute: isLoggedIn ? '/todo' : '/login',
       getPages: [
-        GetPage(name: '/login', page: () => const LoginPage()),
-        GetPage(name: '/register', page: () => const RegisterPage()),
+        GetPage(name: '/login', page: () => LoginPage()),
+        GetPage(name: '/register', page: () => RegisterPage()),
+        GetPage(name: '/forgot-password', page: () => ForgotPasswordPage()),
         GetPage(name: '/todo', page: () => const TodoPage()),
         GetPage(name: '/todo-page', page: () => const TodoPage()),
         GetPage(name: '/statistics', page: () => const StatisticsPage()),

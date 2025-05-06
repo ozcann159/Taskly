@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:new_todo_app/controllers/todo_controller.dart';
-import 'package:new_todo_app/models/todo_model.dart';
+import 'package:new_todo_app/data/models/todo_model.dart';
+import 'package:new_todo_app/presentation/controllers/todo_controller.dart';
 
 class CompletedTodosPage extends StatelessWidget {
   const CompletedTodosPage({super.key});
