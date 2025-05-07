@@ -10,6 +10,8 @@
 
 # Uygulama Arayüzleri
 ![Uygulama Arayüzleri](assets/images/app_image.png)
+![Karanlık Mod Desteği](assets/images/6.png)
+![Kullanılan Teknikler](assets/images/7.png)
 
 ## 📱 Uygulama Hakkında
 
