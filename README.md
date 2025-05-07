@@ -8,6 +8,9 @@
   <b>Hayatınızı düzenleyin, zamanınızı yönetin!</b>
 </p>
 
+# Uygulama Arayüzleri
+![Uygulama Arayüzleri](assets/images/app_image.png)
+
 ## 📱 Uygulama Hakkında
 
 Taskly, günlük görevlerinizi, projelerinizi ve yapılacaklar listenizi kolayca yönetmenizi sağlayan modern ve kullanıcı dostu bir görev yönetim uygulamasıdır. Flutter ile geliştirilmiş, Firebase altyapısını kullanan bu uygulama, görevlerinizi kategorilere ayırmanıza, öncelik belirlemenize ve hatırlatıcılar ayarlamanıza olanak tanır.
