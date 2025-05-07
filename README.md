@@ -1,16 +1,39 @@
-# new_todo_app
+# Taskly - Modern Todo Uygulaması
 
-A new Flutter project.
+<p align="center">
+  <img src="assets/icon/logo.png" alt="Taskly Logo" width="200"/>
+</p>
 
-## Getting Started
+<p align="center">
+  <b>Hayatınızı düzenleyin, zamanınızı yönetin!</b>
+</p>
 
-This project is a starting point for a Flutter application.
+## 📱 Uygulama Hakkında
 
-A few resources to get you started if this is your first Flutter project:
+Taskly, günlük görevlerinizi, projelerinizi ve yapılacaklar listenizi kolayca yönetmenizi sağlayan modern ve kullanıcı dostu bir görev yönetim uygulamasıdır. Flutter ile geliştirilmiş, Firebase altyapısını kullanan bu uygulama, görevlerinizi kategorilere ayırmanıza, öncelik belirlemenize ve hatırlatıcılar ayarlamanıza olanak tanır.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## ✨ Özellikler
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Modern Arayüz**: Kullanımı kolay, şık tasarım
+- **Kategori Sistemi**: Görevlerinizi iş, kişisel, alışveriş, eğitim, sağlık ve diğer kategorilere ayırın
+- **Öncelik Seviyeleri**: Önemli görevlerinizi vurgulayın
+- **Bildirim Hatırlatıcıları**: Görevlerinizi asla unutmayın
+- **Tarih Planlama**: Son tarihleri belirleyin ve takip edin
+- **Karanlık Mod**: Gözlerinizi koruyun, gece de rahatça kullanın
+- **Firebase Entegrasyonu**: Verileriniz güvenle bulutta saklanır
+- **Kullanıcı Kimlik Doğrulama**: Güvenli giriş ve kayıt sistemi
+
+## 🛠️ Teknolojiler
+
+- **Flutter**: UI geliştirme
+- **GetX**: Durum yönetimi
+- **Firebase**: Veritabanı ve kimlik doğrulama
+- **Cloud Firestore**: Veri saklama
+- **Firebase Auth**: Kullanıcı yönetimi
+- **Flutter Local Notifications**: Bildirim sistemi
+
+## 📥 Kurulum
+
+1. Projeyi klonlayın:
+```bash
+git clone https://github.com/ozcann159/Taskly.git
