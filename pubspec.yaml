@@ -1,8 +1,8 @@
 name: new_todo_app
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.3+17
 
 environment:
   sdk: ^3.7.2
@@ -23,7 +23,7 @@ dependencies:
   timezone: ^0.10.1
   flutter_launcher_icons: ^0.14.3
   flutter_native_splash: ^2.4.6
- 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,13 +53,9 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: assets/icon/logo.png
+  image: assets/icon/logo_light.png
   color_dark: "#121212"
-  image_dark: assets/icon/logo.png
-  android_gravity: center
-  ios_content_mode: scaleAspectFit
+  image_dark: assets/icon/logo_dark.png
   android_12:
-    image: assets/icon/logo.png
-    icon_background_color: "#FFFFFF"
-    image_dark: assets/icon/logo.png
-    icon_background_color_dark: "#121212"
+    image: assets/icon/logo_light.png
+    image_dark: assets/icon/logo_dark.png

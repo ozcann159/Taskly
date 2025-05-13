@@ -217,20 +217,20 @@ class _TodoPageState extends State<TodoPage> with TickerProviderStateMixin {
           _,
         ) {
           // Başarı bildirimi
-          showCupertinoModalPopup(
-            context: context,
-            builder:
-                (context) => CupertinoActionSheet(
-                  title: Text('Başarılı'),
-                  message: Text('Görev başarıyla silindi'),
-                  actions: [
-                    CupertinoActionSheetAction(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Tamam'),
-                    ),
-                  ],
-                ),
-          );
+          Get.snackbar(
+  'Başarılı',
+  'Görev başarıyla silindi',
+  snackPosition: SnackPosition.BOTTOM,
+  backgroundColor: Colors.green[600],
+  colorText: Colors.white,
+  borderRadius: 10,
+  margin: EdgeInsets.all(12),
+  duration: Duration(seconds: 2),
+  icon: Icon(Icons.check_circle_outline, color: Colors.white),
+  shouldIconPulse: true,
+  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+  snackStyle: SnackStyle.FLOATING,
+);
         });
       },
       child: Card(

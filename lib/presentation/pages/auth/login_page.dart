@@ -127,7 +127,6 @@ class _LoginPageState extends State<LoginPage>
                   opacity: _fadeAnimation,
                   child: Text(
                     "Taskly'ye\nHoş Geldiniz",
-
                     style: GoogleFonts.poppins(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,

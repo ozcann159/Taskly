@@ -615,11 +615,13 @@ class _TodoFormPageState extends State<TodoFormPage> {
                                     'Düşük',
                                     Colors.green,
                                   ),
+                                  const SizedBox(width: 8),
                                   _buildPriorityButton(
                                     2,
                                     'Orta',
                                     Colors.orange,
                                   ),
+                                  const SizedBox(width: 8),
                                   _buildPriorityButton(3, 'Yüksek', Colors.red),
                                 ],
                               ),

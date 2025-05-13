@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:new_todo_app/presentation/pages/auth/forgot_password_page.dart';
 import 'package:new_todo_app/presentation/pages/auth/login_page.dart';
 import 'package:new_todo_app/presentation/pages/auth/register_page.dart';
@@ -34,6 +35,19 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.blue,
           brightness: Brightness.light,
         ),
+         textTheme: TextTheme(
+          displayLarge: GoogleFonts.poppins(fontSize: 20),
+          displayMedium: GoogleFonts.poppins(fontSize: 18),
+          displaySmall: GoogleFonts.poppins(fontSize: 16),
+          headlineMedium: GoogleFonts.poppins(fontSize: 14),
+          headlineSmall: GoogleFonts.poppins(fontSize: 12),
+          titleLarge: GoogleFonts.poppins(fontSize: 14),
+          titleMedium: GoogleFonts.poppins(fontSize: 12),
+          titleSmall: GoogleFonts.poppins(fontSize: 11),
+          bodyLarge: GoogleFonts.poppins(fontSize: 14),
+          bodyMedium: GoogleFonts.poppins(fontSize: 12),
+          bodySmall: GoogleFonts.poppins(fontSize: 11),
+        ),
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           elevation: 2,
@@ -44,6 +58,19 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.dark,
+        ),
+         textTheme: TextTheme(
+          displayLarge: GoogleFonts.poppins(fontSize: 20),
+          displayMedium: GoogleFonts.poppins(fontSize: 18),
+          displaySmall: GoogleFonts.poppins(fontSize: 16),
+          headlineMedium: GoogleFonts.poppins(fontSize: 14),
+          headlineSmall: GoogleFonts.poppins(fontSize: 12),
+          titleLarge: GoogleFonts.poppins(fontSize: 14),
+          titleMedium: GoogleFonts.poppins(fontSize: 12),
+          titleSmall: GoogleFonts.poppins(fontSize: 11),
+          bodyLarge: GoogleFonts.poppins(fontSize: 14),
+          bodyMedium: GoogleFonts.poppins(fontSize: 12),
+          bodySmall: GoogleFonts.poppins(fontSize: 11),
         ),
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
       ),

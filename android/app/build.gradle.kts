@@ -1,14 +1,13 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") // 🔹 Firebase plugin buraya eklendi
+    id("com.google.gms.google-services") // 🔹 Firebase plugin
 }
 
 android {
     namespace = "com.elifozcan.todoapp"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion  // Flutter'dan alınan compileSdkVersion kullanıldı
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -23,18 +22,27 @@ android {
     defaultConfig {
         applicationId = "com.elifozcan.todoapp"
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        targetSdk = flutter.targetSdkVersion // Flutter'dan alınan targetSdkVersion kullanıldı
+        versionCode =  14// Versiyon kodu (flutter.versionCode yerine manuel belirlenmiş)
+        versionName = "1.0.5" // Versiyon adı (flutter.versionName yerine manuel belirlenmiş)
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:/Users/Ozcan/keystore.jks") // Keystore dosyasının yolunu burada doğru yazın
+            storePassword = "123456"  // Keystore şifrenizi buraya yazın
+            keyAlias = "upload" // Anahtar alias'ınızı buraya yazın
+            keyPassword = "123456"  // Key şifrenizi buraya yazın
+        }
     }
 
     buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("debug")
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source = "../.."  // Flutter kaynak yolu, proje dizinine göre doğru olduğunu kontrol edin
 }
