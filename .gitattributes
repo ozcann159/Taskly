@@ -1,2 +1,14 @@
 *.apk filter=lfs diff=lfs merge=lfs -text
 android/app/build/outputs/flutter-apk/app-debug.apk filter=lfs diff=lfs merge=lfs -text
+# Git LFS ayarları
+*.apk filter=lfs diff=lfs merge=lfs -text
+android/app/build/outputs/flutter-apk/app-debug.apk filter=lfs diff=lfs merge=lfs -text
+
+# GitHub linguist ayarları: platform klasörlerini dil analizinden hariç tut
+android/** linguist-vendored
+ios/** linguist-vendored
+macos/** linguist-vendored
+windows/** linguist-vendored
+linux/** linguist-vendored
+web/** linguist-vendored
+test/** linguist-vendored
