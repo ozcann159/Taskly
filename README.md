@@ -39,6 +39,8 @@ Taskly, günlük görevlerinizi, projelerinizi ve yapılacaklar listenizi kolayc
 
 ## 📥 Kurulum
 
-1. Projeyi klonlayın:
 ```bash
 git clone https://github.com/ozcann159/Taskly.git
+cd Taskly
+flutter pub get
+flutter run
